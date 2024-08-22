@@ -22,20 +22,44 @@ from MySQLdb import OperationalError
 app = Flask(__name__)
 
 # MySQL Configuration
-app.config['MYSQL_HOST'] = "localhost"
-app.config['MYSQL_USER'] = "root"
-app.config['MYSQL_PASSWORD'] = "123456"
-app.config['MYSQL_DB'] = "flaskproject"
-app.config['MYSQL_POOL_RECYCLE'] = 299  # Set pool recycle to prevent timeout
+load_dotenv()
+app.config['MYSQL_HOST'] = os.getenv('MYSQL_HOST')
+app.config['MYSQL_USER'] = os.getenv('MYSQL_USER')
+app.config['MYSQL_PASSWORD'] = os.getenv('MYSQL_PASSWORD')
+app.config['MYSQL_DB'] = os.getenv('MYSQL_DB')
+app.config['MYSQL_POOL_RECYCLE'] = 299  # Optional, helps manage database connections
 
 mysql = MySQL(app)
 app.secret_key = "IceCream"
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
+# Load environment variables from .env file
+
+GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
+GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
+GOOGLE_PROJECT_ID = os.getenv('GOOGLE_PROJECT_ID')
+GOOGLE_AUTH_URI = os.getenv('GOOGLE_AUTH_URI')
+GOOGLE_TOKEN_URI = os.getenv('GOOGLE_TOKEN_URI')
+GOOGLE_AUTH_PROVIDER_CERT_URL = os.getenv('GOOGLE_AUTH_PROVIDER_CERT_URL')
+GOOGLE_REDIRECT_URIS = os.getenv('GOOGLE_REDIRECT_URIS').split(',')
+GOOGLE_JAVASCRIPT_ORIGINS = os.getenv('GOOGLE_JAVASCRIPT_ORIGINS').split(',')
+
+client_secrets_file = {
+    "web": {
+        "client_id": GOOGLE_CLIENT_ID,
+        "project_id": GOOGLE_PROJECT_ID,
+        "auth_uri": GOOGLE_AUTH_URI,
+        "token_uri": GOOGLE_TOKEN_URI,
+        "auth_provider_x509_cert_url": GOOGLE_AUTH_PROVIDER_CERT_URL,
+        "client_secret": GOOGLE_CLIENT_SECRET,
+        "redirect_uris": GOOGLE_REDIRECT_URIS,
+        "javascript_origins": GOOGLE_JAVASCRIPT_ORIGINS
+    }
+}
+
+
 # Google OAuth Configuration
-GOOGLE_CLIENT_ID = "290319685296-g4h0q0th1c88ighau3vkq249d1isvu4f.apps.googleusercontent.com"
-client_secrets_file = os.path.join(pathlib.Path(__file__).parent, "client_secret.json")
 
 flow = Flow.from_client_secrets_file(
     client_secrets_file=client_secrets_file,
