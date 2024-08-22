@@ -63,16 +63,17 @@ client_secrets_file_path = "client_secrets.json"
 with open(client_secrets_file_path, "w") as json_file:
     json.dump(client_secrets_file, json_file)
 
+# Use the path to the client secrets file
 flow = Flow.from_client_secrets_file(
     client_secrets_file=client_secrets_file_path,
     scopes=["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email", "openid"],
-    redirect_uri=GOOGLE_REDIRECT_URIS[0]  # Change as needed
+    redirect_uri="https://smilysoul.onrender.com/authorize"
 )
 
 flowcounsellor = Flow.from_client_secrets_file(
     client_secrets_file=client_secrets_file_path,
     scopes=["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email", "openid"],
-    redirect_uri=GOOGLE_REDIRECT_URIS[1]  # Change as needed
+    redirect_uri="https://smilysoul.onrender.com/authorizecounsellor"
 )
 
 @app.teardown_appcontext
