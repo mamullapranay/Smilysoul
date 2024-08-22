@@ -74,13 +74,13 @@ with open(client_secrets_file_path, "w") as json_file:
 flow = Flow.from_client_secrets_file(
     client_secrets_file=client_secrets_file_path,
     scopes=["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email", "openid"],
-    redirect_uri="http://127.0.0.1:8080/authorize"
+    redirect_uri="https://smilysoul.onrender.com/authorize"
 )
 
 flowcounsellor = Flow.from_client_secrets_file(
     client_secrets_file=client_secrets_file_path,
     scopes=["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email", "openid"],
-    redirect_uri="http://127.0.0.1:8080/authorizecounsellor"
+    redirect_uri="https://smilysoul.onrender.com/authorizecounsellor"
 )
 @app.teardown_appcontext
 def teardown_db(exception):
