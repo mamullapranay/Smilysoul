@@ -4,7 +4,6 @@ import random
 import string
 import datetime
 import requests
-
 import json
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, url_for, session, abort, g
@@ -309,7 +308,7 @@ def logincounsellor():
         return redirect(url_for("counsellor_session"))
     else:
         authorization_url, state = flowcounsellor.authorization_url()
-        session["state"] = state
+        session["oauth_state"] = state  # Store the state in session
         return redirect(authorization_url)
 
 @app.route("/authorizecounsellor")
@@ -317,11 +316,11 @@ def authorizecounsellor():
     if "counsellorid" in session:
         return redirect(url_for("counsellor_session"))
     else:
+        # Compare state from session with the state returned in the response
+        if session["oauth_state"] != request.args.get("state"):
+            return redirect(url_for("home"))  # Redirect to home or show an error page
+
         flowcounsellor.fetch_token(authorization_response=request.url)
-
-        if session["state"] != request.args["state"]:
-            return redirect(url_for("counsellor_session"))
-
         credentials = flowcounsellor.credentials
         request_session = requests.session()
         cached_session = cachecontrol.CacheControl(request_session)
