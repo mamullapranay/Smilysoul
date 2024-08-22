@@ -4,7 +4,6 @@ import random
 import string
 import datetime
 import requests
-
 import json
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, url_for, session, abort, g
@@ -20,22 +19,24 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_mysqldb import MySQL
 from MySQLdb import OperationalError
 
+# Load environment variables from .env file
+load_dotenv()
+
 app = Flask(__name__)
 
 # MySQL Configuration
-load_dotenv()
 app.config['MYSQL_HOST'] = os.getenv('MYSQL_HOST')
 app.config['MYSQL_USER'] = os.getenv('MYSQL_USER')
 app.config['MYSQL_PASSWORD'] = os.getenv('MYSQL_PASSWORD')
 app.config['MYSQL_DB'] = os.getenv('MYSQL_DB')
-app.config['MYSQL_POOL_RECYCLE'] = 299  # Optional, helps manage database connections
+app.config['MYSQL_POOL_RECYCLE'] = 299  # Helps manage database connections
 
 mysql = MySQL(app)
-app.secret_key = "IceCream"
+app.secret_key = os.getenv('SECRET_KEY') or "IceCream"  # Use a strong, random key in production
 
-os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+# OAuth Configuration
+os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # For development purposes only
 
-# Load environment variables from .env file
 GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
 GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
 GOOGLE_PROJECT_ID = os.getenv('GOOGLE_PROJECT_ID')
@@ -58,24 +59,20 @@ client_secrets_file = {
     }
 }
 
-# Load environment variables and create client secrets file
 client_secrets_file_path = "client_secrets.json"
-
-# Ensure this file path exists and is correctly created with the proper content
 with open(client_secrets_file_path, "w") as json_file:
     json.dump(client_secrets_file, json_file)
 
-# Use the path to the client secrets file
 flow = Flow.from_client_secrets_file(
     client_secrets_file=client_secrets_file_path,
     scopes=["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email", "openid"],
-    redirect_uri="https://smilysoul.onrender.com/authorize"
+    redirect_uri=GOOGLE_REDIRECT_URIS[0]  # Change as needed
 )
 
 flowcounsellor = Flow.from_client_secrets_file(
     client_secrets_file=client_secrets_file_path,
     scopes=["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email", "openid"],
-    redirect_uri="https://smilysoul.onrender.com/authorizecounsellor"
+    redirect_uri=GOOGLE_REDIRECT_URIS[1]  # Change as needed
 )
 
 @app.teardown_appcontext
@@ -85,14 +82,13 @@ def teardown_db(exception):
             g.mysql_db.close()
         except OperationalError as e:
             print(f"Error closing MySQL connection: {e}")
-            pass  # Handle the exception or log it
 
 @app.route("/")
 def index():
     if "user" in session:
         return redirect(url_for("dashboard"))
     else:
-        return redirect("/home")
+        return redirect(url_for("home"))
 
 @app.route("/home")
 def home():
@@ -116,10 +112,10 @@ def authorize():
     if "user" in session:
         return redirect(url_for("dashboard"))
     else:
-        flow.fetch_token(authorization_response=request.url)
-        if session["state"] != request.args["state"]:
-            return redirect(url_for("dashboard"))
+        if session["state"] != request.args.get("state"):
+            abort(403)  # Handle CSRF error by returning a 403 Forbidden
 
+        flow.fetch_token(authorization_response=request.url)
         credentials = flow.credentials
         request_session = requests.session()
         cached_session = cachecontrol.CacheControl(request_session)
@@ -139,7 +135,7 @@ def authorize():
         cur = mysql.connection.cursor()
         resultvalue = cur.execute("SELECT * FROM users WHERE user_id=%s", (session["user"],))
         if resultvalue == 0:
-            cur.execute("INSERT INTO users(user_id,email_id,name) VALUES(%s,%s,%s)", (session["user"],session["mail"],session["name"],))
+            cur.execute("INSERT INTO users(user_id, email_id, name) VALUES(%s, %s, %s)", (session["user"], session["mail"], session["name"]))
             mysql.connection.commit()
         cur.close()
 
@@ -161,13 +157,13 @@ def profile():
             dob = userDetails['dob']
             cur = mysql.connection.cursor()
 
-            if dob != "":
-                cur.execute("UPDATE users SET dob=%s WHERE user_id=%s", (dob, session["user"],))
+            if dob:
+                cur.execute("UPDATE users SET dob=%s WHERE user_id=%s", (dob, session["user"]))
             else:
                 cur.execute("UPDATE users SET dob=NULL WHERE user_id=%s", (session["user"],))
 
             if gender:
-                cur.execute("UPDATE users SET gender=%s WHERE user_id=%s", (gender, session["user"],))
+                cur.execute("UPDATE users SET gender=%s WHERE user_id=%s", (gender, session["user"]))
             else:
                 cur.execute("UPDATE users SET gender=NULL WHERE user_id=%s", (session["user"],))
 
@@ -175,11 +171,10 @@ def profile():
             cur.close()
 
         cur = mysql.connection.cursor()
-        resultvalue = cur.execute("SELECT * FROM users WHERE user_id=%s", (session["user"],))
+        cur.execute("SELECT * FROM users WHERE user_id=%s", (session["user"],))
         row = cur.fetchone()
         gender = row[4]
         dob = row[3]
-        mysql.connection.commit()
         cur.close()
 
         return render_template("profile.html", name=session["name"], mail=session["mail"], imageurl=session["image"], dob=dob, gender=gender)
@@ -192,7 +187,6 @@ def booking():
         cur = mysql.connection.cursor()
         cur.execute("SELECT * FROM counsellor")
         result = cur.fetchall()
-        mysql.connection.commit()
         cur.close()
         return render_template("booking.html", tb=result)
     else:
@@ -200,8 +194,7 @@ def booking():
 
 @app.route("/logout")
 def logout():
-    for key in list(session.keys()):
-        session.pop(key)
+    session.clear()
     return redirect(url_for("index"))
 
 @app.route("/slot/<id>")
@@ -217,11 +210,10 @@ def slot(id):
         session["counsellor_id"] = id
         cur = mysql.connection.cursor()
         dct = {"Monday": [], "Tuesday": [], "Wednesday": [], "Thursday": [], "Friday": [], "Saturday": [], "Sunday": []}
-        cur.execute("SELECT day_available,time_slot,flag FROM day_availability WHERE counsellor_id=%s", (id,))
+        cur.execute("SELECT day_available, time_slot, flag FROM day_availability WHERE counsellor_id=%s", (id,))
         result = cur.fetchall()
         for row in result:
             dct[row[0]].append([row[1], row[2] == 1])
-        mysql.connection.commit()
         cur.close()
 
         l = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
@@ -240,23 +232,18 @@ def mysession():
     if "user" in session:
         if request.method == "POST":
             slotDetail = request.form
-            time, date, day = (slotDetail['btnradio']).split('@')
+            time, date, day = slotDetail['btnradio'].split('@')
             counsellor_id = session["counsellor_id"]
             session["booked_counsellor"] = counsellor_id
             user_id = session["user"]
             cur = mysql.connection.cursor()
 
-            if counsellor_id == "1":
-                meetlink = "https://meet.google.com/atr-jafq-gqt"
-            elif counsellor_id == "2":
-                meetlink = "https://meet.google.com/ddf-dmbb-kya"
-            else:
-                meetlink = "https://meet.google.com/ddf-dmbb-kya"
+            meetlink = "https://meet.google.com/atr-jafq-gqt" if counsellor_id == "1" else "https://meet.google.com/ddf-dmbb-kya"
 
             cur.execute("INSERT INTO appointment(Counsellor_Id, User_ID, Start_Time, Date, meet_link) VALUES(%s, %s, %s, %s, %s)", 
-                        (counsellor_id, user_id, time, date, meetlink,))
+                        (counsellor_id, user_id, time, date, meetlink))
             cur.execute("UPDATE day_availability SET flag=1 WHERE day_available=%s AND time_slot=%s AND counsellor_id=%s", 
-                        (day, time, counsellor_id,))
+                        (day, time, counsellor_id))
             mysql.connection.commit()
             cur.close()
 
@@ -294,13 +281,12 @@ def mysession():
 def delete():
     if request.method == "POST":
         bookingDetail = request.form
-        day, time, booked_counsellor = (bookingDetail['btndelete']).split('@')
+        day, time, booked_counsellor = bookingDetail['btndelete'].split('@')
         cur = mysql.connection.cursor()
-        cur.execute("UPDATE day_availability SET flag=0 WHERE day_available=%s AND time_slot=%s AND counsellor_id=%s", (day, time, booked_counsellor,))
+        cur.execute("UPDATE day_availability SET flag=0 WHERE day_available=%s AND time_slot=%s AND counsellor_id=%s", (day, time, booked_counsellor))
         cur.execute("DELETE FROM appointment WHERE user_id=%s", (session["user"],))
         mysql.connection.commit()
         cur.close()
-
     return redirect(url_for("mysession"))
 
 @app.route("/logincounsellor")
@@ -317,11 +303,10 @@ def authorizecounsellor():
     if "counsellorid" in session:
         return redirect(url_for("counsellor_session"))
     else:
+        if session["state"] != request.args.get("state"):
+            abort(403)  # Handle CSRF error by returning a 403 Forbidden
+
         flowcounsellor.fetch_token(authorization_response=request.url)
-
-        if session["state"] != request.args["state"]:
-            return redirect(url_for("counsellor_session"))
-
         credentials = flowcounsellor.credentials
         request_session = requests.session()
         cached_session = cachecontrol.CacheControl(request_session)
@@ -341,7 +326,7 @@ def authorizecounsellor():
         cur = mysql.connection.cursor()
         resultvalue = cur.execute("SELECT * FROM counsellor WHERE counsellor_id=%s", (session["counsellorid"],))
         if resultvalue == 0:
-            cur.execute("INSERT INTO counsellor(counsellor_id, email_id, name, image) VALUES(%s, %s, %s, %s)", (session["counsellorid"], session["counsellormail"], session["counsellorname"], session["counsellorimage"],))
+            cur.execute("INSERT INTO counsellor(counsellor_id, email_id, name, image) VALUES(%s, %s, %s, %s)", (session["counsellorid"], session["counsellormail"], session["counsellorname"], session["counsellorimage"]))
             mysql.connection.commit()
         cur.close()
 
@@ -354,33 +339,22 @@ def counsellor_session():
 
     cur = mysql.connection.cursor()
     cur.execute("SELECT * FROM appointment WHERE Counsellor_id=%s", (session["counsellorid"],))
-
     result = cur.fetchall()
     user = []
-    for i in range(len(result)):
-        temp = []
-        temp.append(result[i][3])
-        temp.append(result[i][4])
-        temp.append(result[i][5])
-        cur.execute("SELECT * FROM users WHERE user_id=%s", (result[i][2],))
-        tempuser = cur.fetchall()
-        temp.append(tempuser[0][2])
-        temp.append(tempuser[0][1])
-        temp.append(tempuser[0][3])
-        temp.append(tempuser[0][4])
-        temp.append(result[i][1])
+    for row in result:
+        temp = [row[3], row[4], row[5]]
+        cur.execute("SELECT * FROM users WHERE user_id=%s", (row[2],))
+        tempuser = cur.fetchone()
+        temp.extend([tempuser[2], tempuser[1], tempuser[3], tempuser[4], row[1]])
         user.append(temp)
-    mysql.connection.commit()
     cur.close()
     return render_template("counsellor_sessions.html", data=user)
 
 # Video calling setup
-roomname = ''
-
 load_dotenv()
-twilio_account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
-twilio_api_key_sid = os.environ.get('TWILIO_API_KEY_SID')
-twilio_api_key_secret = os.environ.get('TWILIO_API_KEY_SECRET')
+twilio_account_sid = os.getenv('TWILIO_ACCOUNT_SID')
+twilio_api_key_sid = os.getenv('TWILIO_API_KEY_SID')
+twilio_api_key_secret = os.getenv('TWILIO_API_KEY_SECRET')
 twilio_client = Client(twilio_api_key_sid, twilio_api_key_secret, twilio_account_sid)
 
 def get_chatroom(name):
@@ -401,7 +375,6 @@ def join():
 @app.route('/video', methods=['POST'])
 def video():
     if "user" in session:
-        uid = session["user"]
         cur = mysql.connection.cursor()
         cur.execute("SELECT * FROM appointment WHERE user_id=%s", (session["user"],))
         res = cur.fetchone()
@@ -421,7 +394,6 @@ def video():
 
         return {'token': token.to_jwt().decode(), 'conversation_sid': conversation.sid}
     elif "counsellorid" in session:
-        cid = session["counsellorid"]
         cur = mysql.connection.cursor()
         cur.execute("SELECT * FROM appointment WHERE counsellor_id=%s", (session["counsellorid"],))
         res = cur.fetchone()
@@ -442,6 +414,15 @@ def video():
         return {'token': token.to_jwt().decode(), 'conversation_sid': conversation.sid}
     else:
         return redirect(url_for("home"))
+
+# Error Handlers
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    return render_template('500.html'), 500
 
 if __name__ == "__main__":
     app.run(debug=True, port=8080)
