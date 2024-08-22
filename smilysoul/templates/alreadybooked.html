@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block main_content %}
+
+<div class="card text-center">
+    <div class="card-header">
+      Session Booking
+    </div>
+    <div class="card-body">
+      <h5 class="card-title">Session Already Booked</h5>
+      <p class="card-text"> Dear student you already booked a session. Kindly Check here and if you want to change time please cancel it first.</p>
+      <a href="/mysession" class="btn btn-primary">Check and Modify Session</a>
+    </div>
+    <div class="card-footer text-muted">
+      Thankyou
+    </div>
+  </div>
+
+{% endblock main_content %}from datetime import datetime
+
+now = datetime.now()
+
+current_time = now.strftime("%H:%M:%S")

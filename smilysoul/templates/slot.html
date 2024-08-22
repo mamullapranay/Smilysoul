@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% block main_content %}
+{% set k = [1] %}
+<h1 class="display-1">Time Slots</h1>
+<div class="conatiner my-5 mx-auto border border-dark" style="width: 60%;">
+    <ul class="nav nav-pills mb-5 p-3" id="pills-tab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="pills-day1-tab" data-bs-toggle="pill" data-bs-target="#pills-day1"
+                type="button" role="tab" aria-controls="pills-day1" aria-selected="true">
+                <div>{{ ls[0] }}</div>
+                <div>{{ date_lst[0] }}</div>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="pills-day2-tab" data-bs-toggle="pill" data-bs-target="#pills-day2"
+                type="button" role="tab" aria-controls="pills-day2" aria-selected="false">
+                <div>{{ ls[1] }}</div>
+                <div>{{ date_lst[1] }}</div>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="pills-day3-tab" data-bs-toggle="pill" data-bs-target="#pills-day3"
+                type="button" role="tab" aria-controls="pills-day3" aria-selected="false">
+                <div>{{ ls[2] }}</div>
+                <div>{{ date_lst[2] }}</div>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="pills-day4-tab" data-bs-toggle="pill" data-bs-target="#pills-day4"
+                type="button" role="tab" aria-controls="pills-day4" aria-selected="false">
+                <div>{{ ls[3] }}</div>
+                <div>{{ date_lst[3] }}</div>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="pills-day5-tab" data-bs-toggle="pill" data-bs-target="#pills-day5"
+                type="button" role="tab" aria-controls="pills-day5" aria-selected="false">
+                <div>{{ ls[4] }}</div>
+                <div>{{ date_lst[4] }}</div>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="pills-day6-tab" data-bs-toggle="pill" data-bs-target="#pills-day6"
+                type="button" role="tab" aria-controls="pills-day6" aria-selected="false">
+                <div>{{ ls[5] }}</div>
+                <div>{{ date_lst[5]}}</div>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="pills-day7-tab" data-bs-toggle="pill" data-bs-target="#pills-day7"
+                type="button" role="tab" aria-controls="pills-day7" aria-selected="false">
+                <div>{{ ls[6] }}</div>
+                <div>{{ date_lst[6]}}</div>
+            </button>
+        </li>
+    </ul>
+    <form action=/mysession method=POST>
+        <div class="tab-content  mb-5 p-3" id="pills-tabContent">
+
+            <div class="tab-pane fade show active" id="pills-day1" role="tabpanel" aria-labelledby="pills-day1-tab">
+                <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                    {% for value in d[ls[0]] %}
+                    {% if value[1] == True%}
+                    <input type="radio" class="btn-check" name="btnradio" id="btncheck{{k[0]}}"
+                        value="{{value[0]}}@{{date_lst[0]}}@{{ls[0]}}" autocomplete="off" disabled>
+                    <label class="btn btn-outline-primary" for="btncheck{{k[0]}}">{{ value[0]}} to {{ value[0] + inc }}  </label>
+                    {% else %}
+                    <input type="radio" class="btn-check" name="btnradio" id="btncheck{{k[0]}}"
+                        value="{{value[0]}}@{{date_lst[0]}}@{{ls[0]}}" autocomplete="off">
+                    <label class="btn btn-outline-primary" for="btncheck{{k[0]}}">{{ value[0]}} to {{ value[0] + inc}} </label>
+                    {% endif %}
+                    {% if k.append(k.pop() + 1) %}{% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="tab-pane fade" id="pills-day2" role="tabpanel" aria-labelledby="pills-day2-tab">
+                <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                    {% for value in d[ls[1]] %}
+                    {% if value[1] == True %}
+                    <input type="radio" class="btn-check" name="btnradio" id="btncheck{{k[0]}}"
+                        value="{{value[0]}}@{{date_lst[1]}}@{{ls[1]}}" autocomplete="off" disabled>
+                    <label class="btn btn-outline-primary" for="btncheck{{k[0]}}">{{ value[0]}} to {{ value[0] + inc }}  </label>
+                    {% else %}
+                    <input type="radio" class="btn-check" name="btnradio" id="btncheck{{k[0]}}"
+                        value="{{value[0]}}@{{date_lst[1]}}@{{ls[1]}}" autocomplete="off">
+                    <label class="btn btn-outline-primary" for="btncheck{{k[0]}}">{{ value[0]}} to {{ value[0] + inc }}  </label>
+                    {% endif %}
+                    {% if k.append(k.pop() + 1) %}{% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="tab-pane fade" id="pills-day3" role="tabpanel" aria-labelledby="pills-day3-tab">
+                <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                    {% for value in d[ls[2]] %}
+                    {% if value[1] == True %}
+                    <input type="radio" class="btn-check" name="btnradio" id="btncheck{{k[0]}}"
+                        value="{{value[0]}}@{{date_lst[2]}}@{{ls[2]}}" autocomplete="off" disabled>
+                    <label class="btn btn-outline-primary" for="btncheck{{k[0]}}">{{ value[0]}} to {{ value[0] + inc }}  </label>
+                    {% else %}
+                    <input type="radio" class="btn-check" name="btnradio" id="btncheck{{k[0]}}"
+                        value="{{value[0]}}@{{date_lst[2]}}@{{ls[2]}}" autocomplete="off">
+                    <label class="btn btn-outline-primary" for="btncheck{{k[0]}}">{{ value[0]}} to {{ value[0] + inc }}  </label>
+                    {% endif %}
+                    {% if k.append(k.pop() + 1) %}{% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="tab-pane fade" id="pills-day4" role="tabpanel" aria-labelledby="pills-day4-tab">
+                <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                    {% for value in d[ls[3]] %}
+                    {% if value[1] == True %}
+                    <input type="radio" class="btn-check" name="btnradio" id="btncheck{{k[0]}}"
+                        value="{{value[0]}}@{{date_lst[3]}}@{{ls[3]}}" autocomplete="off" disabled>
+                    <label class="btn btn-outline-primary" for="btncheck{{k[0]}}">{{ value[0]}} to {{ value[0] + inc }}  </label>
+                    {% else %}
+                    <input type="radio" class="btn-check" name="btnradio" id="btncheck{{k[0]}}"
+                        value="{{value[0]}}@{{date_lst[3]}}@{{ls[3]}}" autocomplete="off">
+                    <label class="btn btn-outline-primary" for="btncheck{{k[0]}}">{{ value[0]}} to {{ value[0] + inc }}  </label>
+                    {% endif %}
+                    {% if k.append(k.pop() + 1) %}{% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="tab-pane fade" id="pills-day5" role="tabpanel" aria-labelledby="pills-day5-tab">
+                <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                    {% for value in d[ls[4]] %}
+                    {% if value[1] == True %}
+                    <input type="radio" class="btn-check" name="btnradio" id="btncheck{{k[0]}}"
+                        value="{{value[0]}}@{{date_lst[4]}}@{{ls[4]}}" autocomplete="off" disabled>
+                    <label class="btn btn-outline-primary" for="btncheck{{k[0]}}">{{ value[0]}} to {{ value[0] + inc }}  </label>
+                    {% else %}
+                    <input type="radio" class="btn-check" name="btnradio" id="btncheck{{k[0]}}"
+                        value="{{value[0]}}@{{date_lst[4]}}@{{ls[4]}}" autocomplete="off">
+                    <label class="btn btn-outline-primary" for="btncheck{{k[0]}}">{{ value[0]}} to {{ value[0] + inc }}  </label>
+                    {% endif %}
+                    {% if k.append(k.pop() + 1) %}{% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="tab-pane fade" id="pills-day6" role="tabpanel" aria-labelledby="pills-day6-tab">
+                <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                    {% for value in d[ls[5]] %}
+                    {% if value[1] == True %}
+                    <input type="radio" class="btn-check" name="btnradio" id="btncheck{{k[0]}}"
+                        value="{{value[0]}}@{{date_lst[5]}}@{{ls[5]}}" autocomplete="off" disabled>
+                    <label class="btn btn-outline-primary" for="btncheck{{k[0]}}">{{ value[0]}} to {{ value[0] + inc }}  </label>
+                    {% else %}
+                    <input type="radio" class="btn-check" name="btnradio" id="btncheck{{k[0]}}"
+                        value="{{value[0]}}@{{date_lst[5]}}@{{ls[5]}}" autocomplete="off">
+                    <label class="btn btn-outline-primary" for="btncheck{{k[0]}}">{{ value[0]}} to {{ value[0] + inc }}  </label>
+                    {% endif %}
+                    {% if k.append(k.pop() + 1) %}{% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="tab-pane fade" id="pills-day7" role="tabpanel" aria-labelledby="pills-day7-tab">
+                <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                    {% for value in d[ls[6]] %}
+                    {% if value[1] == True %}
+                    <input type="radio" class="btn-check" name="btnradio" id="btncheck{{k[0]}}"
+                        value="{{value[0]}}@{{date_lst[6]}}@{{ls[6]}}" autocomplete="off" disabled>
+                    <label class="btn btn-outline-primary" for="btncheck{{k[0]}}">{{ value[0]}} to {{ value[0] + inc }}  </label>
+                    {% else %}
+                    <input type="radio" class="btn-check" name="btnradio" id="btncheck{{k[0]}}"
+                        value="{{value[0]}}@{{date_lst[6]}}@{{ls[6]}}" autocomplete="off">
+                    <label class="btn btn-outline-primary" for="btncheck{{k[0]}}">{{ value[0]}} to {{ value[0] + inc }}  </label>
+                    {% endif %}
+                    {% if k.append(k.pop() + 1) %}{% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="mt-5 position-relative" >
+                <button type="Submit" class="btn btn-primary position-absolute top-50 start-50 translate-middle">Book</button>
+            </div>
+
+        </div>
+    </form>
+</div>
+{% endblock main_content %}

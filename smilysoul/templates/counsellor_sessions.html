@@ -1,0 +1,35 @@
+{% extends 'counsellorbase.html' %}
+{% block main_content %}
+<div>
+    <h1 class="display-1 mx-auto" style="text-align: center;"> Sessions Schedule</h1>
+</div>
+<div class="container">
+    <div class="row row-cols-1 row-cols-sm-1 row-cols-md-2 row-cols-l-3 row-cols-xl-3 row-cols-xxl-3">
+        {% for i in data %}
+        <div class="col my-3">
+            <div class="card h-100" style="width: 25rem;">
+                <div class="card-body">
+                    <h5 class="card-title">{{i[3]}}</h5>
+                    <p class="card-text"> <b>Email:</b> {{i[4]}}</p>
+                    <p class="card-text"> <b>Date:</b> {{i[1]}}</p>
+                    <p class="card-text"> <b>Time:</b> {{i[0]}}</p>
+                    {% if i[6] != None %}
+                    <p class="card-text"> <b>Gender:</b> {{i[6]}}</p>
+                    {% endif %}
+                    {% if i[5] != None %}
+                    <p class="card-text"> <b>DOB:</b> {{i[5]}}</p>
+                    {% endif %}
+                    <p class="card-text"> <b>Appointment ID:</b> {{i[7]}}</p>
+                </div>
+                <h7 class="card-footer">
+                    <!-- <form action="/join"> -->
+                        <!-- <button type="submit" class="btn btn-primary btn-sm">Check Project</a> -->
+                    <!-- </form> -->
+                    <a href="/join" class="btn btn-primary">Join Session</a>
+                </h7>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock main_content %}

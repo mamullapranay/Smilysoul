@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block main_content %}
+
+<div class="card text-center">
+  <div class="card-header">
+    Scheduled Counselling Session
+  </div>
+  <div class="card-body">
+    <h5 class="card-title">{{name}}</h5>
+    <p class="card-text">You can join the Session on {{A_datetime}} at the scheduled time on link specified below which
+      will open only at scheduled time</p>
+    <div class="container">
+      {% if not enable %}
+      <a href="/join" class="btn btn-primary">Join Session</a>
+      <!-- <button class="btn btn-primary" disabled>Join Session</button> -->
+      {% else %}
+      <a href="/join" class="btn btn-primary">Join Session</a>
+      <!-- <a href={{meet_link}} class="btn btn-primary">Join Session</a> -->
+      {% endif %}
+      <form action="/delete" method="POST">
+        <button type="Submit" value="{{A_day}}@{{time}}@{{A_counsellor}}" name="btndelete" class="btn btn-danger"
+          style="margin:10px">Cancel</button>
+      </form>
+    </div>
+  </div>
+  <div class="card-footer text-muted">
+    Timing : {{time}}
+  </div>
+</div>
+
+{% endblock main_content %}

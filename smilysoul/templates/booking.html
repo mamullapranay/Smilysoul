@@ -1,0 +1,28 @@
+      {% extends 'base.html' %}
+        {% block main_content %}
+<br><br>
+        <div class="container marketing mx-auto">
+ 
+            <!-- Three columns of text below the carousel -->
+            <div class="row">
+                {% for row in tb %}
+                     
+                <div class="col-lg-4">
+                    <!-- <svg class="bd-placeholder-img rounded-circle" width="140" height="140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#777"/><text x="50%" y="50%" fill="#777" dy=".3em">140x140</text></svg> -->
+                    <img src= {{row[4]}}  class="rounded-circle" width="140" height="140">
+  
+                    <h2>{{row[2]}}</h2>
+                    <p  ><ul style="list-style-type:none;" >
+                       <li> {{row[1]}} </li>
+                       <li> {{row[3]}} </li>
+                    </ul>
+                    </p>
+                    <p><a class="btn btn-secondary" href="/slot/{{row[0]}}">Book Now &raquo;</a></p>
+                </div><!-- /.col-lg-4 -->
+
+                {% endfor %}
+                        
+            </div><!-- /.row -->
+
+        </div>
+        {% endblock main_content %}
