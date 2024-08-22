@@ -5,6 +5,7 @@ import string
 import datetime
 import requests
 
+import json
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, url_for, session, abort, g
 from twilio.jwt.access_token import AccessToken
@@ -18,6 +19,7 @@ import google.auth.transport.requests
 from flask_sqlalchemy import SQLAlchemy
 from flask_mysqldb import MySQL
 from MySQLdb import OperationalError
+from google_auth_oauthlib.flow import Flow
 
 app = Flask(__name__)
 
@@ -59,20 +61,27 @@ client_secrets_file = {
 }
 
 
-# Google OAuth Configuration
 
+
+# Load environment variables and create client secrets file
+client_secrets_file_path = "client_secrets.json"
+
+# Ensure this file path exists and is correctly created with the proper content
+with open(client_secrets_file_path, "w") as json_file:
+    json.dump(client_secrets_file, json_file)
+
+# Use the path to the client secrets file
 flow = Flow.from_client_secrets_file(
-    client_secrets_file=client_secrets_file,
+    client_secrets_file=client_secrets_file_path,
     scopes=["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email", "openid"],
     redirect_uri="http://127.0.0.1:8080/authorize"
 )
 
 flowcounsellor = Flow.from_client_secrets_file(
-    client_secrets_file=client_secrets_file,
+    client_secrets_file=client_secrets_file_path,
     scopes=["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email", "openid"],
     redirect_uri="http://127.0.0.1:8080/authorizecounsellor"
 )
-
 @app.teardown_appcontext
 def teardown_db(exception):
     if hasattr(g, 'mysql_db'):
