@@ -137,11 +137,11 @@ def authorize():
         session["mail"] = id_info.get("email")
         
         cur=mysql.connection.cursor()
-        resultvalue=cur.execute("SELECT * FROM USERS WHERE user_id=%s", (session["user"],))
+        resultvalue=cur.execute("SELECT * FROM users WHERE user_id=%s", (session["user"],))
         if (resultvalue==0):
             print(resultvalue)
             print("userauth")
-            cur.execute("INSERT INTO USERS(user_id,email_id,name) VALUES(%s,%s,%s)", (session["user"],session["mail"],session["name"],))
+            cur.execute("INSERT INTO users(user_id,email_id,name) VALUES(%s,%s,%s)", (session["user"],session["mail"],session["name"],))
             mysql.connection.commit()
         cur.close()
 
@@ -164,19 +164,19 @@ def profile():
             dob = userDetails['dob']
             cur=mysql.connection.cursor()
             if(dob!=""):
-                cur.execute("UPDATE USERS SET dob=%s WHERE user_id=%s",(dob,session["user"],))
+                cur.execute("UPDATE users SET dob=%s WHERE user_id=%s",(dob,session["user"],))
             else :
-                cur.execute("UPDATE USERS SET dob=NULL WHERE user_id=%s",(session["user"],))
+                cur.execute("UPDATE users SET dob=NULL WHERE user_id=%s",(session["user"],))
                 
             if(gender!=None):
-                cur.execute("UPDATE USERS SET gender=%s WHERE user_id=%s",(gender,session["user"],))
+                cur.execute("UPDATE users SET gender=%s WHERE user_id=%s",(gender,session["user"],))
             else :
-                cur.execute("UPDATE USERS SET gender=NULL WHERE user_id=%s",(session["user"],))
+                cur.execute("UPDATE users SET gender=NULL WHERE user_id=%s",(session["user"],))
             mysql.connection.commit()
             cur.close()
 
         cur=mysql.connection.cursor()
-        resultvalue=cur.execute("SELECT * FROM USERS WHERE user_id=%s", (session["user"],))
+        resultvalue=cur.execute("SELECT * FROM users WHERE user_id=%s", (session["user"],))
         
         row = cur.fetchone()
         gender = row[4]
@@ -279,7 +279,7 @@ def mysession():
                 meetlink ="https://meet.google.com/ddf-dmbb-kya"
 
             print(day,time)
-            cur.execute("INSERT INTO appointment (Counsellor_Id,User_ID,Start_Time,Date,meet_link) VALUES(%s,%s,%s,%s,%s)",(counsellor_id,user_id,time,date,meetlink,))
+            cur.execute("INSERT INTO appointment (counsellor_id,user_id,start_time,date,meet_link) VALUES(%s,%s,%s,%s,%s)",(counsellor_id,user_id,time,date,meetlink,))
             cur.execute("update day_availability set flag=1 where day_available = %s AND time_slot=%s  AND counsellor_id=%s",(day,time,counsellor_id,))
             print(cur.fetchall())
             mysql.connection.commit()
@@ -375,10 +375,10 @@ def authorizecounsellor():
         session["counsellormail"] = id_info.get("email")
         
         cur=mysql.connection.cursor()
-        resultvalue=cur.execute("SELECT * FROM Counsellor WHERE counsellor_id=%s", (session["counsellorid"],))
+        resultvalue=cur.execute("SELECT * FROM counsellor  WHERE counsellor_id=%s", (session["counsellorid"],))
         if (resultvalue==0):
             print(resultvalue)
-            cur.execute("INSERT INTO Counsellor(counsellor_id,email_id,name,image) VALUES(%s,%s,%s,%s)", (session["counsellorid"],session["counsellormail"],session["counsellorname"],session["counsellorimage"],))
+            cur.execute("INSERT INTO counsellor (counsellor_id,email_id,name,image) VALUES(%s,%s,%s,%s)", (session["counsellorid"],session["counsellormail"],session["counsellorname"],session["counsellorimage"],))
             
             cur.execute("INSERT INTO day_availability VALUES (%s,'Friday','10:30:00',0)", (session["counsellorid"],))
             cur.execute("INSERT INTO day_availability VALUES (%s,'Friday','11:15:00',0)", (session["counsellorid"],))
@@ -412,7 +412,7 @@ def counsellor_session():
         return redirect(url_for("home"))
     
     cur = mysql.connection.cursor()
-    cur.execute("select * from appointment where Counsellor_id=%s",(session["counsellorid"],))
+    cur.execute("select * from appointment where counsellor_id =%s",(session["counsellorid"],))
     
     result = cur.fetchall()
     user=[]
