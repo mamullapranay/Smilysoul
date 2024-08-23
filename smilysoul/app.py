@@ -278,14 +278,14 @@ def mysession():
                 meetlink ="https://meet.google.com/ddf-dmbb-kya"
 
             print(day,time)
-            cur.execute("INSERT INTO APPOINTMENT(Counsellor_Id,User_ID,Start_Time,Date,meet_link) VALUES(%s,%s,%s,%s,%s)",(counsellor_id,user_id,time,date,meetlink,))
+            cur.execute("INSERT INTO appointment (Counsellor_Id,User_ID,Start_Time,Date,meet_link) VALUES(%s,%s,%s,%s,%s)",(counsellor_id,user_id,time,date,meetlink,))
             cur.execute("update day_availability set flag=1 where day_available = %s AND time_slot=%s  AND counsellor_id=%s",(day,time,counsellor_id,))
             print(cur.fetchall())
             mysql.connection.commit()
             cur.close()
         uid=session["user"]
         cur = mysql.connection.cursor()
-        cur.execute("select * from ( SELECT * from APPOINTMENT natural join counsellor where user_id=%s) as a",(session["user"],))
+        cur.execute("select * from ( SELECT * from appointment  natural join counsellor where user_id=%s) as a",(session["user"],))
         res=cur.fetchone()
         if (res!=0 and res!=None ):
             print(res)
@@ -484,7 +484,7 @@ def video():
     if "user" in session:
         uid=session["user"]
         cur = mysql.connection.cursor()
-        cur.execute(" SELECT * from APPOINTMENT  where user_id=%s",(session["user"],))
+        cur.execute(" SELECT * from appointment   where user_id=%s",(session["user"],))
         res=cur.fetchone()
         cur.close()
         roomname=res[0]
@@ -508,7 +508,7 @@ def video():
     elif "counsellorid" in session:
         cid=session["counsellorid"]
         cur = mysql.connection.cursor()
-        cur.execute(" SELECT * from APPOINTMENT  where counsellor_id=%s",(session["counsellorid"],))
+        cur.execute(" SELECT * from appointment where counsellor_id=%s",(session["counsellorid"],))
         res=cur.fetchone()
         cur.close()
         roomname=res[0]
