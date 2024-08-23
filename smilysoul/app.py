@@ -13,6 +13,7 @@ from google_auth_oauthlib.flow import Flow
 from pip._vendor import cachecontrol
 import google.auth.transport.requests
 from flask_mysqldb import MySQL
+from twilio.base.exceptions import TwilioRestException
 
 # Initialize the Flask application
 app = Flask(__name__)
